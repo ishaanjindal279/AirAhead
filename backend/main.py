@@ -29,9 +29,7 @@ def health_check():
 def get_forecast(city: str = "delhi", h: int = 24):
     # Validate h manually if needed, or rely on Enum if strict
     if h not in [6, 24, 72]:
-         # Fallback or strict error? User asked for discrete horizon.
-         # Pydantic validation handles it if we used the Enum in query, 
-         # but let's be flexible in input parsing, strict in logic.
+
          if h not in [6, 24, 72]:
              raise HTTPException(status_code=400, detail="Horizon must be 6, 24, or 72")
     
@@ -100,7 +98,9 @@ def alerts(zoneId: str = None, persona: str = None, horizon_hours: int = 24, sim
 @app.post("/purifier-control", response_model=PurifierControlResponse)
 def purifier_control(body: PurifierControlRequest):
     # In production this would authenticate & call device gateway
-    return mock_data.mock_purifier_control(body.dict())
+    # Use Pydantic v2 API to avoid deprecation warnings
+    # model_dump() returns a dict representation similar to dict()
+    return mock_data.mock_purifier_control(body.model_dump())
 
 if __name__ == "__main__":
     import uvicorn
