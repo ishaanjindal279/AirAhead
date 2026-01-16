@@ -7,3 +7,4 @@ xgboost
 numpy
 python-multipart
 pytest
+httpx
