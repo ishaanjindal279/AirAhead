@@ -2,6 +2,7 @@ import { AQIMetricsGrid } from '../components/dashboard/AQIMetricsGrid';
 import { SevenDayForecast } from '../components/dashboard/SevenDayForecast';
 import { AlertsFeed } from '../components/dashboard/AlertsFeed';
 import { QuickActions } from '../components/dashboard/QuickActions';
+import { SmartControls } from '../components/dashboard/SmartControls';
 import { AQIMap } from '../components/AQIMap';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 
@@ -9,8 +10,9 @@ export function OverviewDashboard() {
   return (
     <div className="p-6 space-y-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
-        {/* Quick Actions */}
-        <QuickActions />
+        {/* Smart Controls & Quick Actions */}
+        <SmartControls />
+        {/* <QuickActions /> */}
 
         {/* AQI Metrics Grid */}
         <AQIMetricsGrid />

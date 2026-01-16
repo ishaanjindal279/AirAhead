@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority@0.7.1";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "./utils";
 
@@ -19,18 +19,38 @@ const alertVariants = cva(
   },
 );
 
+import { X } from "lucide-react";
+
 function Alert({
   className,
   variant,
+  dismissible,
+  onDismiss,
+  children,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: React.ComponentProps<"div"> & 
+  VariantProps<typeof alertVariants> & {
+    dismissible?: boolean;
+    onDismiss?: () => void;
+  }) {
   return (
     <div
       data-slot="alert"
       role="alert"
       className={cn(alertVariants({ variant }), className)}
       {...props}
-    />
+    >
+      {children}
+      {dismissible && (
+        <button
+          onClick={onDismiss}
+          className="absolute right-4 top-4 rounded-md p-1 opacity-50 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <X className="w-4 h-4" />
+          <span className="sr-only">Close</span>
+        </button>
+      )}
+    </div>
   );
 }
 

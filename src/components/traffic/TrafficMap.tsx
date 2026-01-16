@@ -1,94 +1,83 @@
+
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Card, CardHeader, CardTitle, CardDescription } from '../ui/Card';
-import { Navigation, MapPin } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
-export function TrafficMap() {
-  const routes = [
-    { name: 'Route A', color: 'bg-green-500', aqi: 45, label: 'Clean Route' },
-    { name: 'Route B', color: 'bg-yellow-500', aqi: 75, label: 'Moderate' },
-    { name: 'Route C', color: 'bg-red-500', aqi: 115, label: 'Congested' },
-  ];
+// Fix Leaflet marker icons in React
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Delhi Center
+const CENTER: [number, number] = [28.6139, 77.2090];
+
+const HOTSPOTS = [
+  { id: '1', name: 'Ring Road', lat: 28.5700, lng: 77.2300, aqi: 385, color: 'red' },
+  { id: '2', name: 'ITO', lat: 28.6295, lng: 77.2450, aqi: 410, color: 'purple' },
+  { id: '3', name: 'Outer Ring Road', lat: 28.5500, lng: 77.2000, aqi: 310, color: 'orange' },
+];
+
+function ChangeView({ center }: { center: [number, number] }) {
+  const map = useMap();
+  map.setView(center);
+  return null;
+}
+
+export function TrafficMap() {
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Traffic & Route Map</CardTitle>
-            <CardDescription>Real-time congestion and air quality routing</CardDescription>
+            <CardTitle>Live Traffic Pollution Map</CardTitle>
+            <CardDescription>Real-time high-emission zones in NCR</CardDescription>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors text-sm font-medium">
-            <Navigation className="w-4 h-4" />
-            <span>Navigate</span>
-          </button>
+          <div className="flex gap-2">
+            <Badge variant="destructive">Severe Congestion</Badge>
+            <Badge variant="warning">Moderate</Badge>
+          </div>
         </div>
       </CardHeader>
-
-      <div className="px-6 pb-6">
-        <div className="relative bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 rounded-xl h-[500px] overflow-hidden">
-          {/* Grid */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgwLDAsMCwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+      
+      <div className="flex-1 min-h-[500px] overflow-hidden rounded-b-xl relative z-0">
+        <MapContainer center={CENTER} zoom={11} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+          <ChangeView center={CENTER} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
           
-          {/* Start and End Markers */}
-          <div className="absolute top-8 left-8 flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">
-            <MapPin className="w-4 h-4" />
-            <span className="font-semibold">Start</span>
-          </div>
-          
-          <div className="absolute bottom-8 right-8 flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg">
-            <MapPin className="w-4 h-4" />
-            <span className="font-semibold">Destination</span>
-          </div>
-
-          {/* Route Lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            {/* Route A - Clean (Green) */}
-            <path
-              d="M 50 50 Q 150 100, 250 150 T 450 250"
-              stroke="#10b981"
-              strokeWidth="6"
-              fill="none"
-              strokeDasharray="10,5"
-              opacity="0.8"
-            />
-            {/* Route B - Moderate (Yellow) */}
-            <path
-              d="M 50 50 Q 200 200, 400 300 T 500 380"
-              stroke="#f59e0b"
-              strokeWidth="6"
-              fill="none"
-              strokeDasharray="10,5"
-              opacity="0.8"
-            />
-            {/* Route C - Congested (Red) */}
-            <path
-              d="M 50 50 Q 300 100, 350 250 T 500 380"
-              stroke="#ef4444"
-              strokeWidth="6"
-              fill="none"
-              strokeDasharray="10,5"
-              opacity="0.8"
-            />
-          </svg>
-
-          {/* Route Legend */}
-          <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg">
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Routes</p>
-            <div className="space-y-2">
-              {routes.map((route) => (
-                <div key={route.name} className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 ${route.color} rounded-full`}></div>
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{route.name}</span>
-                  </div>
-                  <Badge variant={route.aqi <= 50 ? 'success' : route.aqi <= 100 ? 'warning' : 'error'} size="sm">
-                    {route.aqi}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          {HOTSPOTS.map((spot) => (
+             <CircleMarker 
+                key={spot.id} 
+                center={[spot.lat, spot.lng]} 
+                radius={20}
+                pathOptions={{ 
+                    color: spot.color === 'red' ? '#ef4444' : spot.color === 'purple' ? '#7e22ce' : '#f97316',
+                    fillColor: spot.color === 'red' ? '#ef4444' : spot.color === 'purple' ? '#7e22ce' : '#f97316',
+                    fillOpacity: 0.6 
+                }}
+             >
+                <Popup>
+                    <div className="p-1">
+                        <strong className="block text-lg">{spot.name}</strong>
+                        <div className="text-sm">AQI: <span className="font-bold">{spot.aqi}</span></div>
+                        <div className="text-xs text-gray-500 mt-1">Traffic Impact: High</div>
+                    </div>
+                </Popup>
+             </CircleMarker>
+          ))}
+        </MapContainer>
       </div>
     </Card>
   );

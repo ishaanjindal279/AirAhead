@@ -7,6 +7,7 @@ interface AQIBadgeProps {
 
 export function AQIBadge({ value, size = 'md', showLabel = true, className = '' }: AQIBadgeProps) {
   const getAQIConfig = (aqi: number) => {
+    // CPCB Standards (Indian AQI)
     if (aqi <= 50) {
       return {
         label: 'Good',
@@ -18,6 +19,15 @@ export function AQIBadge({ value, size = 'md', showLabel = true, className = '' 
     }
     if (aqi <= 100) {
       return {
+        label: 'Satisfactory',
+        color: 'bg-teal-500 dark:bg-teal-600',
+        lightColor: 'bg-teal-50 dark:bg-teal-950',
+        textColor: 'text-teal-700 dark:text-teal-300',
+        borderColor: 'border-teal-200 dark:border-teal-800',
+      };
+    }
+    if (aqi <= 200) {
+      return {
         label: 'Moderate',
         color: 'bg-yellow-500 dark:bg-yellow-600',
         lightColor: 'bg-yellow-50 dark:bg-yellow-950',
@@ -25,35 +35,26 @@ export function AQIBadge({ value, size = 'md', showLabel = true, className = '' 
         borderColor: 'border-yellow-200 dark:border-yellow-800',
       };
     }
-    if (aqi <= 150) {
+    if (aqi <= 300) {
       return {
-        label: 'Unhealthy for Sensitive',
+        label: 'Poor',
         color: 'bg-orange-500 dark:bg-orange-600',
         lightColor: 'bg-orange-50 dark:bg-orange-950',
         textColor: 'text-orange-700 dark:text-orange-300',
         borderColor: 'border-orange-200 dark:border-orange-800',
       };
     }
-    if (aqi <= 200) {
+    if (aqi <= 400) {
       return {
-        label: 'Unhealthy',
+        label: 'Very Poor',
         color: 'bg-red-500 dark:bg-red-600',
         lightColor: 'bg-red-50 dark:bg-red-950',
         textColor: 'text-red-700 dark:text-red-300',
         borderColor: 'border-red-200 dark:border-red-800',
       };
     }
-    if (aqi <= 300) {
-      return {
-        label: 'Very Unhealthy',
-        color: 'bg-purple-500 dark:bg-purple-600',
-        lightColor: 'bg-purple-50 dark:bg-purple-950',
-        textColor: 'text-purple-700 dark:text-purple-300',
-        borderColor: 'border-purple-200 dark:border-purple-800',
-      };
-    }
     return {
-      label: 'Hazardous',
+      label: 'Severe',
       color: 'bg-maroon-700 dark:bg-maroon-800',
       lightColor: 'bg-maroon-50 dark:bg-maroon-950',
       textColor: 'text-maroon-900 dark:text-maroon-200',

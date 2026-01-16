@@ -1,55 +1,87 @@
-import { useRef } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from '../ui/Card';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { apiClient } from '../../api/client';
+import { ForecastResponse } from '../../types';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-export function MultiMetricForecast() {
-  const chartRef = useRef(null);
+interface MultiMetricForecastProps {
+  city: string;
+}
 
-  const labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
-  
+export function MultiMetricForecast({ city }: MultiMetricForecastProps) {
+  const chartRef = useRef(null);
+  const [forecast, setForecast] = useState<ForecastResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchForecast = async () => {
+      setLoading(true); // Reset loading state on city change
+      try {
+        const data = await apiClient.getForecast(city, 24); // Use prop city
+        setForecast(data);
+      } catch (e) {
+        console.error("MultiMetric Load Failed", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchForecast();
+  }, [city]); // Dependency on city
+
+  if (loading || !forecast) {
+     return <Card><div className="p-12 text-center">Loading live metrics...</div></Card>;
+  }
+
+  // Map API series to chart
+  // Use first 7 points if daily, or just show hourly trend?
+  // Let's show every 3rd hour to avoid overcrowding if 24h
+  const points = forecast.series; 
+  const labels = points.map(p => new Date(p.timestamp).toLocaleTimeString([], { hour: '2-digit' }));
+
   const data = {
     labels,
     datasets: [
       {
         label: 'AQI',
-        data: [65, 72, 85, 78, 68, 55, 62],
+        data: points.map(p => p.aqi),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 2,
       },
       {
         label: 'PM2.5',
-        data: [25, 28, 35, 32, 27, 22, 24],
+        data: points.map(p => p.pm2_5 || 0),
         borderColor: 'rgb(16, 185, 129)',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 2,
       },
       {
         label: 'PM10',
-        data: [42, 48, 55, 51, 45, 38, 41],
+        data: points.map(p => p.pm10 || 0),
         borderColor: 'rgb(245, 158, 11)',
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 2,
       },
       {
         label: 'Ozone',
-        data: [48, 52, 58, 54, 50, 45, 47],
+        data: points.map(p => p.o3 || 0),
         borderColor: 'rgb(168, 85, 247)',
         backgroundColor: 'rgba(168, 85, 247, 0.1)',
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 2,
       },
     ],
   };
@@ -95,12 +127,12 @@ export function MultiMetricForecast() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Multi-Metric 7-Day Forecast</CardTitle>
-            <CardDescription>Comprehensive air quality predictions across all pollutants</CardDescription>
+            <CardTitle>Multi-Metric Forecast (Live ML)</CardTitle>
+            <CardDescription>Real-time AI prediction for {forecast.city}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="success" dot>ML Model v3.2</Badge>
-            <Badge variant="info">95% Accuracy</Badge>
+            <Badge variant="success" dot>Spatial LightGBM v6</Badge>
+            <Badge variant="info">MAE 24.5</Badge>
           </div>
         </div>
       </CardHeader>

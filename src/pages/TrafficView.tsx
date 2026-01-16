@@ -1,6 +1,6 @@
 import { TrafficMap } from '../components/traffic/TrafficMap';
 import { RouteComparison } from '../components/traffic/RouteComparison';
-import { CleanRoutes } from '../components/traffic/CleanRoutes';
+import { TrafficControlPanel } from '../components/traffic/TrafficControlPanel';
 import { TrafficStats } from '../components/traffic/TrafficStats';
 
 export function TrafficView() {
@@ -10,12 +10,12 @@ export function TrafficView() {
         {/* Traffic Stats */}
         <TrafficStats />
 
-        {/* Map and Clean Routes */}
+        {/* Map and Controls */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <TrafficMap />
           </div>
-          <CleanRoutes />
+          <TrafficControlPanel />
         </div>
 
         {/* Route Comparison */}

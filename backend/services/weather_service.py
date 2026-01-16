@@ -166,6 +166,13 @@ def transform_to_features(raw_data: Dict[str, Any]) -> Dict[str, Any]:
         'aqi': final_aqi,
         'year': year,
         'day_of_week': day_of_week,
+        # Helper keys for API response (not strictly features for ML, but passed through)
+        'temp_c': temp_c,
+        'wind_kph': wind_kph,
+        'uv': curr.get("uv", 0),
+        'pm2_5': pm25, # Alias for schema consistency
+        'o3': aqi_data.get("o3", 0),
+        
         'is_weekend': is_weekend,
         'hour_sin': hour_sin,
         'hour_cos': hour_cos,
@@ -179,3 +186,20 @@ def transform_to_features(raw_data: Dict[str, Any]) -> Dict[str, Any]:
 async def get_live_features(city: str) -> Dict[str, Any]:
     raw = await fetch_weather_data(city)
     return transform_to_features(raw)
+
+async def get_ncr_data() -> Dict[str, Dict[str, Any]]:
+    """
+    Fetches processed features for ALL supported NCR cities concurrently.
+    Returns: { 'Delhi': {...}, 'Noida': {...}, ... }
+    """
+    tasks = [get_live_features(city) for city in SUPPORTED_CITIES]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    ncr_data = {}
+    for city, res in zip(SUPPORTED_CITIES, results):
+        if isinstance(res, Exception):
+            print(f"Error fetching {city}: {res}")
+            continue
+        ncr_data[city] = res
+        
+    return ncr_data

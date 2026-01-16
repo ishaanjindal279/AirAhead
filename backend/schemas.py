@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
 # --- Shared Enums ---
+# Forced reload trigger
 class RiskCategory(str, Enum):
     good = "good"
     satisfactory = "satisfactory"
@@ -23,6 +24,9 @@ class ForecastPoint(BaseModel):
     timestamp: datetime = Field(..., description="ISO8601 timestamp")
     aqi: int = Field(..., description="Numeric AQI value")
     category: RiskCategory
+    pm2_5: Optional[float] = None
+    pm10: Optional[float] = None
+    o3: Optional[float] = None
 
 class Horizon(int, Enum):
     h6 = 6
@@ -30,11 +34,22 @@ class Horizon(int, Enum):
     h72 = 72
 
 # --- Endpoint 1: Forecast ---
+class CurrentWeather(BaseModel):
+    temp_c: float
+    humidity: int
+    wind_kph: float
+    uv: float
+    pm2_5: float
+    pm10: float
+    no2: Optional[float] = None
+    o3: Optional[float] = None
+
 class ForecastResponse(BaseModel):
     city: str
     horizon: int
     series: List[ForecastPoint]
     currentRisk: RiskCategory
+    currentWeather: Optional[CurrentWeather] = None
 
 # --- Endpoint 2: Simulation ---
 class SimulationModifiers(BaseModel):
