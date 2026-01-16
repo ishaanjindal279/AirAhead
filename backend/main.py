@@ -5,6 +5,10 @@ from schemas import (
     PersonaAdviceResponse, PersonaType, Horizon
 )
 import mock_data
+from schemas import (
+    PredictResponse, HotspotsResponse, TrafficResponse, AlertsResponse,
+    PurifierControlRequest, PurifierControlResponse
+)
 
 app = FastAPI(title="AirAhead Integration Layer", version="1.0.0")
 
@@ -42,6 +46,61 @@ def get_persona_advice(type: PersonaType, h: int = 24):
     if h not in [6, 24, 72]:
         raise HTTPException(status_code=400, detail="Horizon must be 6, 24, or 72")
     return mock_data.mock_persona_advice(type, h)
+
+
+@app.get("/predict", response_model=PredictResponse)
+def predict(zoneId: str = "zone_1", horizon_hours: int = 24, sim: str = None):
+    # sim is expected to be a JSON string or None; mock_data accepts a dict
+    import json
+    sim_obj = None
+    if sim:
+        try:
+            sim_obj = json.loads(sim)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid sim JSON")
+    return mock_data.mock_predict(zoneId, horizon_hours, sim_obj)
+
+
+@app.get("/hotspots", response_model=HotspotsResponse)
+def hotspots(horizon_hours: int = 24, minAQI: int = 151, limit: int = 20, sim: str = None):
+    import json
+    sim_obj = None
+    if sim:
+        try:
+            sim_obj = json.loads(sim)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid sim JSON")
+    return mock_data.mock_hotspots(horizon_hours, minAQI, limit, sim_obj)
+
+
+@app.get("/traffic", response_model=TrafficResponse)
+def traffic(origin_lat: float = None, origin_lng: float = None, dest_lat: float = None, dest_lng: float = None, zoneId: str = None, departureAt: str = None, sim: str = None):
+    import json
+    sim_obj = None
+    if sim:
+        try:
+            sim_obj = json.loads(sim)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid sim JSON")
+    return mock_data.mock_traffic(origin_lat, origin_lng, dest_lat, dest_lng, zoneId, departureAt, sim_obj)
+
+
+@app.get("/alerts", response_model=AlertsResponse)
+def alerts(zoneId: str = None, persona: str = None, horizon_hours: int = 24, sim: str = None):
+    import json
+    sim_obj = None
+    if sim:
+        try:
+            sim_obj = json.loads(sim)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid sim JSON")
+    return mock_data.mock_alerts(zoneId, persona, horizon_hours, sim_obj)
+
+
+@app.post("/purifier-control", response_model=PurifierControlResponse)
+def purifier_control(body: PurifierControlRequest):
+    # In production this would authenticate & call device gateway
+    return mock_data.mock_purifier_control(body.dict())
 
 if __name__ == "__main__":
     import uvicorn
