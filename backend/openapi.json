@@ -1,0 +1,1423 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AirAhead Integration Layer",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forecast": {
+      "get": {
+        "summary": "Get Forecast",
+        "operationId": "get_forecast_forecast_get",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "delhi",
+              "title": "City"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "H"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulate": {
+      "post": {
+        "summary": "Simulate",
+        "operationId": "simulate_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/persona": {
+      "get": {
+        "summary": "Get Persona Advice",
+        "operationId": "get_persona_advice_persona_get",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PersonaType"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "H"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaAdviceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict": {
+      "get": {
+        "summary": "Predict",
+        "operationId": "predict_predict_get",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "zone_1",
+              "title": "Zoneid"
+            }
+          },
+          {
+            "name": "horizon_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "Horizon Hours"
+            }
+          },
+          {
+            "name": "sim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Sim"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hotspots": {
+      "get": {
+        "summary": "Hotspots",
+        "operationId": "hotspots_hotspots_get",
+        "parameters": [
+          {
+            "name": "horizon_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "Horizon Hours"
+            }
+          },
+          {
+            "name": "minAQI",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 151,
+              "title": "Minaqi"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "sim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Sim"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotspotsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/traffic": {
+      "get": {
+        "summary": "Traffic",
+        "operationId": "traffic_traffic_get",
+        "parameters": [
+          {
+            "name": "origin_lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "title": "Origin Lat"
+            }
+          },
+          {
+            "name": "origin_lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "title": "Origin Lng"
+            }
+          },
+          {
+            "name": "dest_lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "title": "Dest Lat"
+            }
+          },
+          {
+            "name": "dest_lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "title": "Dest Lng"
+            }
+          },
+          {
+            "name": "zoneId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Zoneid"
+            }
+          },
+          {
+            "name": "departureAt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Departureat"
+            }
+          },
+          {
+            "name": "sim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Sim"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrafficResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "summary": "Alerts",
+        "operationId": "alerts_alerts_get",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Zoneid"
+            }
+          },
+          {
+            "name": "persona",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Persona"
+            }
+          },
+          {
+            "name": "horizon_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "Horizon Hours"
+            }
+          },
+          {
+            "name": "sim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Sim"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/purifier-control": {
+      "post": {
+        "summary": "Purifier Control",
+        "operationId": "purifier_control_purifier_control_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurifierControlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurifierControlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AQIBreakdown": {
+        "properties": {
+          "pm2_5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pm2 5"
+          },
+          "pm10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pm10"
+          },
+          "no2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "No2"
+          },
+          "o3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "O3"
+          }
+        },
+        "type": "object",
+        "title": "AQIBreakdown"
+      },
+      "AdviceItem": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "severity": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Severity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "message",
+          "severity"
+        ],
+        "title": "AdviceItem"
+      },
+      "AlertAction": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "payload"
+        ],
+        "title": "AlertAction"
+      },
+      "AlertItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "zones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Zones"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Validfrom"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Validuntil"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AlertAction"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "personaSpecific": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personaspecific"
+          },
+          "ui": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ui"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "title",
+          "message",
+          "severity",
+          "zones",
+          "validFrom",
+          "validUntil",
+          "confidence",
+          "actions",
+          "personaSpecific",
+          "ui"
+        ],
+        "title": "AlertItem"
+      },
+      "AlertsResponse": {
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generatedat"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AlertItem"
+            },
+            "type": "array",
+            "title": "Alerts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generatedAt",
+          "alerts"
+        ],
+        "title": "AlertsResponse"
+      },
+      "Center": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lng": {
+            "type": "number",
+            "title": "Lng"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "title": "Center"
+      },
+      "ConfidenceInterval": {
+        "properties": {
+          "lower": {
+            "type": "number",
+            "title": "Lower"
+          },
+          "upper": {
+            "type": "number",
+            "title": "Upper"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lower",
+          "upper"
+        ],
+        "title": "ConfidenceInterval"
+      },
+      "ForecastPoint": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "ISO8601 timestamp"
+          },
+          "aqi": {
+            "type": "integer",
+            "title": "Aqi",
+            "description": "Numeric AQI value"
+          },
+          "category": {
+            "$ref": "#/components/schemas/RiskCategory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "aqi",
+          "category"
+        ],
+        "title": "ForecastPoint"
+      },
+      "ForecastResponse": {
+        "properties": {
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "horizon": {
+            "type": "integer",
+            "title": "Horizon"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastPoint"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "currentRisk": {
+            "$ref": "#/components/schemas/RiskCategory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "city",
+          "horizon",
+          "series",
+          "currentRisk"
+        ],
+        "title": "ForecastResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HotspotItem": {
+        "properties": {
+          "zoneId": {
+            "type": "string",
+            "title": "Zoneid"
+          },
+          "center": {
+            "$ref": "#/components/schemas/Center"
+          },
+          "expectedMaxAQI": {
+            "type": "integer",
+            "title": "Expectedmaxaqi"
+          },
+          "expectedTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expectedtime"
+          },
+          "drivers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Drivers"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "recommendedAction": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommendedaction"
+          },
+          "uiHint": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uihint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zoneId",
+          "center",
+          "expectedMaxAQI",
+          "expectedTime",
+          "drivers",
+          "severity",
+          "recommendedAction",
+          "uiHint"
+        ],
+        "title": "HotspotItem"
+      },
+      "HotspotsResponse": {
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generatedat"
+          },
+          "hotspots": {
+            "items": {
+              "$ref": "#/components/schemas/HotspotItem"
+            },
+            "type": "array",
+            "title": "Hotspots"
+          },
+          "meta": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generatedAt",
+          "hotspots",
+          "meta"
+        ],
+        "title": "HotspotsResponse"
+      },
+      "PersonaAdviceResponse": {
+        "properties": {
+          "persona": {
+            "$ref": "#/components/schemas/PersonaType"
+          },
+          "adviceTimeline": {
+            "items": {
+              "$ref": "#/components/schemas/AdviceItem"
+            },
+            "type": "array",
+            "title": "Advicetimeline"
+          },
+          "contextualMessage": {
+            "type": "string",
+            "title": "Contextualmessage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "persona",
+          "adviceTimeline",
+          "contextualMessage"
+        ],
+        "title": "PersonaAdviceResponse"
+      },
+      "PersonaType": {
+        "type": "string",
+        "enum": [
+          "jogger",
+          "asthmatic",
+          "child",
+          "elderly"
+        ],
+        "title": "PersonaType"
+      },
+      "PredictPoint": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "aqi": {
+            "type": "integer",
+            "title": "Aqi"
+          },
+          "aqiCategory": {
+            "$ref": "#/components/schemas/RiskCategory"
+          },
+          "aqiBreakdown": {
+            "$ref": "#/components/schemas/AQIBreakdown"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/ConfidenceInterval"
+          },
+          "recommendationScore": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Recommendationscore"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "aqi",
+          "aqiCategory",
+          "aqiBreakdown",
+          "confidence",
+          "recommendationScore"
+        ],
+        "title": "PredictPoint"
+      },
+      "PredictResponse": {
+        "properties": {
+          "zoneId": {
+            "type": "string",
+            "title": "Zoneid"
+          },
+          "requestPeriod": {
+            "$ref": "#/components/schemas/RequestPeriod"
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/PredictPoint"
+            },
+            "type": "array",
+            "title": "Predictions"
+          },
+          "model": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Model"
+          },
+          "cache": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Cache"
+          },
+          "uiHints": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uihints"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zoneId",
+          "requestPeriod",
+          "predictions",
+          "model",
+          "cache",
+          "uiHints"
+        ],
+        "title": "PredictResponse"
+      },
+      "PurifierControlRequest": {
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "title": "Deviceid"
+          },
+          "zoneId": {
+            "type": "string",
+            "title": "Zoneid"
+          },
+          "command": {
+            "type": "string",
+            "title": "Command"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "schedule": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schedule"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "sim": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sim"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deviceId",
+          "zoneId",
+          "command"
+        ],
+        "title": "PurifierControlRequest"
+      },
+      "PurifierControlResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "deviceId": {
+            "type": "string",
+            "title": "Deviceid"
+          },
+          "appliedCommand": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Appliedcommand"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation"
+          },
+          "modelReasoning": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelreasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "deviceId",
+          "appliedCommand",
+          "recommendation",
+          "modelReasoning"
+        ],
+        "title": "PurifierControlResponse"
+      },
+      "RelatedAQI": {
+        "properties": {
+          "zoneId": {
+            "type": "string",
+            "title": "Zoneid"
+          },
+          "aqiNow": {
+            "type": "integer",
+            "title": "Aqinow"
+          },
+          "aqiForecastMax": {
+            "type": "integer",
+            "title": "Aqiforecastmax"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zoneId",
+          "aqiNow",
+          "aqiForecastMax"
+        ],
+        "title": "RelatedAQI"
+      },
+      "RequestPeriod": {
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "title": "From"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "title": "To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "RequestPeriod"
+      },
+      "RerouteSuggestion": {
+        "properties": {
+          "routeId": {
+            "type": "string",
+            "title": "Routeid"
+          },
+          "etaChangeMin": {
+            "type": "integer",
+            "title": "Etachangemin"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "uiHint": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uihint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "routeId",
+          "etaChangeMin",
+          "description",
+          "confidence",
+          "uiHint"
+        ],
+        "title": "RerouteSuggestion"
+      },
+      "RiskCategory": {
+        "type": "string",
+        "enum": [
+          "good",
+          "satisfactory",
+          "moderate",
+          "poor",
+          "very_poor",
+          "severe"
+        ],
+        "title": "RiskCategory"
+      },
+      "RiskShiftResponse": {
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/RiskCategory"
+          },
+          "to": {
+            "$ref": "#/components/schemas/RiskCategory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "RiskShiftResponse"
+      },
+      "Severity": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "score"
+        ],
+        "title": "Severity"
+      },
+      "SimulationModifiers": {
+        "properties": {
+          "traffic": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic",
+            "description": "Traffic multiplier, 1.0 is normal"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 50.0,
+                "minimum": -50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature",
+            "description": "Temperature delta in Celsius"
+          },
+          "festival": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Festival",
+            "description": "Is festival active?"
+          }
+        },
+        "type": "object",
+        "title": "SimulationModifiers"
+      },
+      "SimulationRequest": {
+        "properties": {
+          "modifiers": {
+            "$ref": "#/components/schemas/SimulationModifiers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "modifiers"
+        ],
+        "title": "SimulationRequest"
+      },
+      "SimulationResponse": {
+        "properties": {
+          "baseline": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastPoint"
+            },
+            "type": "array",
+            "title": "Baseline"
+          },
+          "simulated": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastPoint"
+            },
+            "type": "array",
+            "title": "Simulated"
+          },
+          "riskShift": {
+            "$ref": "#/components/schemas/RiskShiftResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "baseline",
+          "simulated",
+          "riskShift"
+        ],
+        "title": "SimulationResponse"
+      },
+      "TrafficResponse": {
+        "properties": {
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Asof"
+          },
+          "route": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Route"
+          },
+          "rerouteSuggestions": {
+            "items": {
+              "$ref": "#/components/schemas/RerouteSuggestion"
+            },
+            "type": "array",
+            "title": "Reroutesuggestions"
+          },
+          "relatedAQI": {
+            "$ref": "#/components/schemas/RelatedAQI"
+          }
+        },
+        "type": "object",
+        "required": [
+          "asOf",
+          "route",
+          "rerouteSuggestions",
+          "relatedAQI"
+        ],
+        "title": "TrafficResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
