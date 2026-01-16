@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+pandas
+prophet
+xgboost
+numpy
+python-multipart
