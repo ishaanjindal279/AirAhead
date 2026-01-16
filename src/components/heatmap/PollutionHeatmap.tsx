@@ -1,38 +1,112 @@
 import { Card, CardHeader, CardTitle, CardDescription } from '../ui/Card';
 import { MapPin, AlertTriangle } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useEffect, useState } from 'react';
 
 interface PollutionHeatmapProps {
   timeSlot: string;
   pollutant: string;
 }
 
+// Hotspot type
+interface Hotspot {
+  name: string;
+  aqi: number;
+  lat: number;
+  lng: number;
+  severity: string;
+}
+
+// Sample hotspots with real lat/lng coordinates (examples centered around a city)
+const hotspots: Hotspot[] = [
+  { name: 'Downtown', aqi: 125, lat: 12.9716, lng: 77.5946, severity: 'high' },
+  { name: 'Financial District', aqi: 98, lat: 12.9750, lng: 77.6050, severity: 'medium' },
+  { name: 'Industrial Zone', aqi: 156, lat: 12.9600, lng: 77.5800, severity: 'critical' },
+  { name: 'Marina', aqi: 45, lat: 12.9850, lng: 77.5700, severity: 'low' },
+  { name: 'Mission', aqi: 88, lat: 12.9550, lng: 77.6100, severity: 'medium' },
+  { name: 'SoMa', aqi: 112, lat: 12.9650, lng: 77.5950, severity: 'high' },
+];
+
+const getSeverityColor = (severity: string) => {
+  switch(severity) {
+    case 'critical': return '#DC2626'; // red-600
+    case 'high': return '#F97316'; // orange-500
+    case 'medium': return '#F59E0B'; // yellow-500
+    default: return '#10B981'; // green-500
+  }
+};
+
+// Helper component to add the heat layer (leaflet.heat) to the map
+function HeatLayer({ points }: { points: Array<[number, number, number]> }) {
+  const map = useMap();
+
+  useEffect(() => {
+    // dynamic import of leaflet.heat (avoids type issues)
+    let heat: any;
+    import('leaflet.heat').then((mod) => {
+      // @ts-ignore
+      heat = (L as any).heatLayer(points, { radius: 25, blur: 15, maxZoom: 17 });
+      heat.addTo(map);
+    });
+
+    return () => {
+      if (heat) {
+        map.removeLayer(heat);
+      }
+    };
+  }, [map, points]);
+
+  return null;
+}
+
 export function PollutionHeatmap({ timeSlot, pollutant }: PollutionHeatmapProps) {
-  const hotspots = [
-    { name: 'Downtown', aqi: 125, x: 40, y: 35, severity: 'high' },
-    { name: 'Financial District', aqi: 98, x: 55, y: 28, severity: 'medium' },
-    { name: 'Industrial Zone', aqi: 156, x: 70, y: 55, severity: 'critical' },
-    { name: 'Marina', aqi: 45, x: 25, y: 20, severity: 'low' },
-    { name: 'Mission', aqi: 88, x: 48, y: 62, severity: 'medium' },
-    { name: 'SoMa', aqi: 112, x: 52, y: 45, severity: 'high' },
-  ];
+  const [liveHotspots, setLiveHotspots] = useState<typeof hotspots>(hotspots);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const getSeverityColor = (severity: string) => {
-    switch(severity) {
-      case 'critical': return 'from-red-500 to-red-600';
-      case 'high': return 'from-orange-500 to-orange-600';
-      case 'medium': return 'from-yellow-500 to-yellow-600';
-      default: return 'from-green-500 to-green-600';
-    }
-  };
+  // Convert hotspots to heat points: [lat, lng, intensity]
+  const heatPoints = liveHotspots.map(h => [h.lat, h.lng, Math.min(1, (h.aqi - 50) / 200)]) as Array<[number, number, number]>;
 
-  const getSeveritySize = (severity: string) => {
-    switch(severity) {
-      case 'critical': return 'w-24 h-24';
-      case 'high': return 'w-20 h-20';
-      case 'medium': return 'w-16 h-16';
-      default: return 'w-12 h-12';
+  const center: [number, number] = [12.9716, 77.5946];
+
+  // Fetch live hotspots from backend
+  useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+    const base = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8000';
+    const url = `${base.replace(/\/$/, '')}/hotspots?horizon_hours=24&limit=50`;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // data.hotspots is expected
+        if (mounted && data?.hotspots) {
+          // Map backend shape to local hotspot shape if needed
+          const mapped = data.hotspots.map((z: any) => ({
+            name: z.zoneId || z.name || 'zone',
+            aqi: z.expectedMaxAQI || z.aqi || 0,
+            lat: z.center?.lat || z.lat || 12.9716,
+            lng: z.center?.lng || z.lng || 77.5946,
+            severity: z.severity?.level || (z.expectedMaxAQI > 200 ? 'critical' : z.expectedMaxAQI > 150 ? 'high' : 'medium')
+          }));
+          setLiveHotspots(mapped);
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') setError(err.message || String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  };
+
+    load();
+    return () => { mounted = false; controller.abort(); };
+  }, [timeSlot, pollutant]);
 
   return (
     <Card>
@@ -42,70 +116,49 @@ export function PollutionHeatmap({ timeSlot, pollutant }: PollutionHeatmapProps)
       </CardHeader>
 
       <div className="px-6 pb-6">
-        {/* Map Container */}
-        <div className="relative bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl h-[600px] overflow-hidden">
-          {/* Grid overlay */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgwLDAsMCwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-          
-          {/* Pollution zones (heat circles) */}
-          {hotspots.map((spot, index) => (
-            <div
-              key={index}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-            >
-              {/* Pulsing heat effect */}
-              <div className={`absolute inset-0 ${getSeveritySize(spot.severity)} bg-gradient-to-br ${getSeverityColor(spot.severity)} rounded-full opacity-20 animate-ping`}></div>
-              <div className={`absolute inset-0 ${getSeveritySize(spot.severity)} bg-gradient-to-br ${getSeverityColor(spot.severity)} rounded-full opacity-30 blur-xl`}></div>
-              
-              {/* Marker */}
-              <div className="relative group cursor-pointer">
-                <div className={`w-12 h-12 bg-gradient-to-br ${getSeverityColor(spot.severity)} rounded-full shadow-lg flex items-center justify-center border-4 border-white dark:border-gray-800 hover:scale-110 transition-transform`}>
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
+        <div className="rounded-xl h-[600px] overflow-hidden relative">
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 dark:bg-black/40">
+              <div className="text-sm font-medium">Loading heatmap…</div>
+            </div>
+          )}
+          {error && (
+            <div className="absolute top-4 right-4 z-30 bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 px-3 py-2 rounded shadow">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
 
-                {/* Tooltip */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-3 rounded-lg shadow-xl whitespace-nowrap">
-                    <p className="font-semibold text-sm">{spot.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs">AQI:</span>
-                      <span className="text-lg font-bold">{spot.aqi}</span>
-                    </div>
-                    {spot.severity === 'critical' && (
-                      <div className="flex items-center gap-1 mt-1 text-red-400 dark:text-red-600">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span className="text-xs">Danger Zone</span>
-                      </div>
-                    )}
+          <MapContainer center={center} zoom={13} scrollWheelZoom={true} style={{ height: '600px', width: '100%' }}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            {/* Heat layer */}
+            <HeatLayer points={heatPoints} />
+
+            {/* Hotspot markers and danger circle overlays */}
+            {liveHotspots.map((spot, idx) => (
+              <Marker key={idx} position={[spot.lat, spot.lng] as [number, number]}>
+                <Popup>
+                  <div className="min-w-[160px]">
+                    <p className="font-semibold">{spot.name}</p>
+                    <p className="text-sm">AQI: <strong>{spot.aqi}</strong></p>
+                    {spot.severity === 'critical' && <p className="text-xs text-red-600">Danger Zone</p>}
                   </div>
-                </div>
-              </div>
-            </div>
-          ))}
+                </Popup>
+              </Marker>
+            ))}
 
-          {/* Legend overlay */}
-          <div className="absolute bottom-4 left-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg">
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Hotspot Count</p>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Critical: 1</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">High: 2</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Medium: 2</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Low: 1</span>
-              </div>
-            </div>
-          </div>
+            {liveHotspots.map((spot, i) => (
+              <Circle
+                key={`c-${i}`}
+                center={[spot.lat, spot.lng]}
+                radius={spot.severity === 'critical' ? 1200 : spot.severity === 'high' ? 800 : 400}
+                pathOptions={{ color: getSeverityColor(spot.severity), fillColor: getSeverityColor(spot.severity), fillOpacity: 0.15 }}
+              />
+            ))}
+          </MapContainer>
         </div>
       </div>
     </Card>
